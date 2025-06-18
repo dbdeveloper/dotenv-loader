@@ -1,6 +1,6 @@
 [project]
 name = "dotenv-loader"
-version = "1.0.0"
+version = "1.0.1"
 description = "Smart .env loader with configurable file location for Python projects."
 authors = [{name="Vladyslav Kozlovskyy", email="dbdevelop@gmail.com"}]
 readme = "README.md"

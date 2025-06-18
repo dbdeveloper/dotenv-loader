@@ -3,13 +3,14 @@
 import os
 import inspect
 from pathlib import Path
+from typing import Union, Optional
 from dotenv import load_dotenv
 
 DEFAULT_CONFIG_ROOT = "~/.config/python-projects"
 DEFAULT_ENV_FILENAME = ".env"
 
 
-def _resolve_path(path: str | Path, base_path: Path = None) -> Path:
+def _resolve_path(path: Union[str, Path], base_path: Optional[Path] = None):
     path = Path(path).expanduser()
     if path.is_absolute(): return path
     elif base_path:        return (base_path / path).resolve()
@@ -17,14 +18,14 @@ def _resolve_path(path: str | Path, base_path: Path = None) -> Path:
 
 
 def load_env(
-    project=None,
-    stage=None,
-    dotenv=None,
-    config_root=None,
+    project: Optional[str] = None,
+    stage: Optional[str] = None,
+    dotenv: Optional[Union[str, Path]] = None,
+    config_root: Optional[Union[str, Path]] = None,
     steps_to_project_root: int = 0,
-    default_env_file=None,
-    override=True
-) -> Path:
+    default_env_file: Optional[str] = None,
+    override: bool = True
+):
     """
     Load environment variables from a .env file with a flexible and hierarchical lookup strategy.
 
