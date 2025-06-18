@@ -4,7 +4,7 @@
 
 This guide provides all necessary instructions for developers who want to:
 
-- Run or contribute to the `dotenv_loader` project.
+- Run or contribute to the `dotenv-loader` project.
 - Understand the test layout and configuration resolution logic.
 - Set up a local development environment.
 - Publish the package to PyPI.
@@ -30,8 +30,8 @@ Optional (but recommended):
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/dbdeveloper/dotenv_loader.git
-cd dotenv_loader
+git clone https://github.com/dbdeveloper/dotenv-loader.git
+cd dotenv-loader
 ```
 
 ### 2. Create Virtual Environment
@@ -105,7 +105,7 @@ rm -rf .pytest_cache .coverage dist build
 ## 📁 Project Structure (Developer View)
 
 ```bash
-dotenv_loader/
+dotenv-loader/
 │
 ├── src/dotenv_loader/         # Main loader logic
 │   └── __init__.py

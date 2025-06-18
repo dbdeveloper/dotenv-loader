@@ -4,3 +4,6 @@ pytest-cov
 codecov
 build
 twine
+black
+flake8
+mypy

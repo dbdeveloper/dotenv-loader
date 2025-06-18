@@ -12,6 +12,7 @@ venv/
 !tests/**/.env
 !tests/**/.env*
 
+tmp/
 *~
 *.old
 *.tmp

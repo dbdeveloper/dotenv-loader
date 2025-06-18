@@ -31,14 +31,17 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.urls]
-"Homepage" = "https://github.com/dbdeveloper/dotenv_loader"
-"Repository" = "https://github.com/dbdeveloper/dotenv_loader"
-"Bug Tracker" = "https://github.com/dbdeveloper/dotenv_loader/issues"
+"Homepage" = "https://github.com/dbdeveloper/dotenv-loader"
+"Repository" = "https://github.com/dbdeveloper/dotenv-loader"
+"Bug Tracker" = "https://github.com/dbdeveloper/dotenv-loader/issues"
 
 [project.optional-dependencies]
 dev = [
     "pytest",
     "pytest-cov",
+    "codecov",
+    "build",
+    "twine",
     "black",
     "flake8",
     "mypy"
