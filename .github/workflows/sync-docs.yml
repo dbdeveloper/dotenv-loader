@@ -23,28 +23,28 @@ jobs:
       - name: Copy and wrap README.md to docs/index.md
         run: |
           echo "---" > docs/index.md
-          echo "title: Головна" >> docs/index.md
+          echo "title: Main" >> docs/index.md
           echo "---" >> docs/index.md
           cat README.md >> docs/index.md
 
       - name: Copy and wrap CHANGELOG.md to docs/changelog/index.md
         run: |
           echo "---" > docs/changelog/index.md
-          echo "title: Зміни" >> docs/changelog/index.md
+          echo "title: Changelog" >> docs/changelog/index.md
           echo "---" >> docs/changelog/index.md
           cat CHANGELOG.md >> docs/changelog/index.md
 
       - name: Copy and wrap LICENSE to docs/license/index.md
         run: |
           echo "---" > docs/license/index.md
-          echo "title: Ліцензія" >> docs/license/index.md
+          echo "title: License" >> docs/license/index.md
           echo "---" >> docs/license/index.md
           cat LICENSE >> docs/license/index.md
 
       - name: Copy and wrap CONTRIBUTING.md to docs/contributing/index.md
         run: |
           echo "---" > docs/contributing/index.md
-          echo "title: Як допомогти" >> docs/contributing/index.md
+          echo "title: Contributing" >> docs/contributing/index.md
           echo "---" >> docs/contributing/index.md
           cat CONTRIBUTING.md >> docs/contributing/index.md
 
