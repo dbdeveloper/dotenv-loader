@@ -1,5 +1,5 @@
 ---
-title: Зміни
+title: Changelog
 ---
 # Changelog
 

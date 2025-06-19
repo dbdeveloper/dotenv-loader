@@ -1,5 +1,5 @@
 ---
-title: Ліцензія
+title: License
 ---
 MIT License
 

@@ -1,5 +1,5 @@
 ---
-title: Як допомогти
+title: Contributing
 ---
 # 🛠 CONTRIBUTING.md
 

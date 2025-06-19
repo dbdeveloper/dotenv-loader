@@ -1,5 +1,5 @@
 ---
-title: Головна
+title: Main
 ---
 # dotenv-loader
 
