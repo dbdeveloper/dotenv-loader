@@ -97,12 +97,32 @@ def test_proj1_use_custom_default_env_file(setup_dotconfig_root, monkeypatch):
     assert os.getenv("SETTING") == "custom_env_proj1"
     assert env_path == setup_dotconfig_root / "proj1/custom.env"
 
+    # Use Path instead of string 
+    env_path = proj1_load_env(default_env_file=Path("./custom.env"))
+    assert os.getenv("SETTING") == "custom_env_proj1"
+    assert env_path == setup_dotconfig_root / "proj1/custom.env"
+
 def test_proj1_use_custom_dotenv_file_with_param(setup_dotconfig_root, monkeypatch):
     # Read a custom dotenv file
     # NOTE: The relative path resolved using the path to project_root=proj1 as working directory
     env_path = proj1_load_env(dotenv="../other_config_root/other-proj/.env")
     assert os.getenv("SETTING") == "other_default_other_proj"
     assert env_path == tests_dir / "other_config_root/other-proj/.env"
+
+    # Use Path instead of string 
+    env_path = proj1_load_env(dotenv=Path("../other_config_root/other-proj/.env"))
+    assert os.getenv("SETTING") == "other_default_other_proj"
+    assert env_path == tests_dir / "other_config_root/other-proj/.env"
+
+    # Empty dotenv - use default path
+    env_path = proj1_load_env(dotenv="")
+    assert os.getenv("SETTING") == "default_proj1"
+    assert env_path == setup_dotconfig_root / "proj1/.env"
+
+    # Use empty Path instead of empty string 
+    env_path = proj1_load_env(dotenv=Path("."))
+    assert os.getenv("SETTING") == "default_proj1"
+    assert env_path == setup_dotconfig_root / "proj1/.env"
 
 def test_proj1_use_custom_dotenv_file_with_env_perf_param(setup_dotconfig_root, monkeypatch):
     # Read a custom dotenv file. Environment variables has preference on the function parameters
@@ -226,6 +246,11 @@ def test_proj2_use_custom_config_root_and_projectname_with_param(setup_dotconfig
     # read a custom dotenv file from the different config root. 
     # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
     env_path = proj2_load_env(config_root="../../other_config_root", project="other-proj")
+    assert os.getenv("SETTING") == "other_default_other_proj"
+    assert env_path == tests_dir / "other_config_root/other-proj/.env"
+
+    # Use Path instead of string 
+    env_path = proj2_load_env(config_root=Path("../../other_config_root"), project="other-proj")
     assert os.getenv("SETTING") == "other_default_other_proj"
     assert env_path == tests_dir / "other_config_root/other-proj/.env"
 
