@@ -103,7 +103,7 @@ DOTSTAGE=staging python manage.py  # loads ~/.config/python-projects/myproject/.
 - **DOTCONFIG_ROOT**: Change the root directory for configuration files:
 
 ```bash
-DOTCONFIG_ROOT=~/myconfigs python manage.py
+DOTCONFIG_ROOT=~/myconfigs python manage.py  # loads ~/myconfigs/myproject/.env
 ```
 
 
@@ -178,12 +178,12 @@ dotenv-loader is especially useful when:
 
 ## 📜 License
 
-[MIT License](LICENSE)
+[MIT License](https://dbdeveloper.github.io/dotenv-loader/license)
 
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started.
+We welcome contributions from the community! Please see [CONTRIBUTING](https://dbdeveloper.github.io/dotenv-loader/contributing) for details on how to get started.
 
 
 ## 🤖 Acknowledgments
@@ -193,7 +193,7 @@ This project was created in collaboration with ChatGPT (OpenAI), utilizing the G
 
 ## 📅 Changelog
 
-For detailed release notes, see [CHANGELOG.md](CHANGELOG.md).
+For detailed release notes, see [CHANGELOG](https://dbdeveloper.github.io/dotenv-loader/changelog).
 
 ---
 

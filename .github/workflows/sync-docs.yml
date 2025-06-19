@@ -1,0 +1,34 @@
+name: Sync Docs to `docs/`
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  copy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy documentation files to docs/
+        run: |
+          mkdir -p docs
+          cp README.md docs/index.md
+          cp CHANGELOG.md docs/changelog.md
+          cp LICENSE docs/license.md
+          cp CONTRIBUTING.md docs/contributing.md
+
+      - name: Commit and push if docs changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update docs from root files"
+            git push
+          fi
+
