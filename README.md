@@ -43,6 +43,21 @@ pip install dotenv-loader
 ```
 
 
+## ✅ Python Compatibility
+
+This package is tested on the following Python versions via GitHub Actions:
+
+| Python version | Status       |
+|----------------|--------------|
+| 3.8            | ✅ Supported |
+| 3.9            | ✅ Supported |
+| 3.10           | ✅ Supported |
+| 3.11           | ✅ Supported |
+| 3.12           | ✅ Supported |
+
+> Automated tests are run on every push and pull request to ensure consistent support.
+
+
 ## 🛠 Usage
 
 ### Basic Usage
@@ -82,9 +97,10 @@ dotenv_loader.load_env(
 
 You can control the behavior of dotenv-loader using the following environment variables:
 
-- **DOTENV** — Path to the .env file or directory.
-   - If a full file path is given, it overrides all other options. If the file is not found, a `FileNotFoundError` is raised.
-   - If a directory path is given, the loader will look for an environment file in that directory, based on `default_env_filename` and `DOTSTAGE` (or fallback `stage`).
+**DOTENV** — Path to the .env file or directory.
+
+- If a full file path is given, it overrides all other options. If the file is not found, a `FileNotFoundError` is raised.
+- If a directory path is given, the loader will look for an environment file in that directory, based on `default_env_filename` and `DOTSTAGE` (or fallback `stage`).
 
 Examples:
 
@@ -98,11 +114,6 @@ DOTSTAGE=prod
  
 DOTENV=~/configs/project python manage.py  # calling load_env(stage='local')
 # Loads ~/configs/project/.env.local
-```
-
-**DOTENV** — Specify an explicit path to the .env file:
-```bash
-DOTENV=/path/to/custom.env python manage.py
 ```
 
 **DOTPROJECT** — Quickly switch between project environments:
