@@ -150,7 +150,7 @@ DOTVERBOSE=1 python manage.py
 
 ### Typical Directory Structure
 
-```
+```bash
 ~/.config/python-projects/
 └── myproject/
     ├── .env          # Default configuration (typically a symlink 
