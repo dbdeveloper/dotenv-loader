@@ -97,52 +97,52 @@ dotenv_loader.load_env(
 
 You can control the behavior of dotenv-loader using the following environment variables:
 
-**DOTENV** — Path to the .env file or directory.
+#### **DOTENV** — Path to the .env file or directory.
 
-    - If a full file path is given, it overrides all other options. If the file is not found, a `FileNotFoundError` is raised.
-    - If a directory path is given, the loader will look for an environment file in that directory, based on `default_env_filename` and `DOTSTAGE` (or fallback `stage`).
+- If a full file path is given, it overrides all other options. If the file is not found, a `FileNotFoundError` is raised.
+- If a directory path is given, the loader will look for an environment file in that directory, based on `default_env_filename` and `DOTSTAGE` (or fallback `stage`).
     
-    Examples:
-    
-    ```
-    DOTENV=/home/user/.env.custom python manage.py
-    # Uses this exact file; raises an error if not found
-     
-    DOTENV=~/myconfigs/myproject python manage.py
-    DOTSTAGE=prod
-    # Loads ~/myconfigs/myproject/.env.prod
-     
-    DOTENV=~/configs/project python manage.py  # calling load_env(stage='local')
-    # Loads ~/configs/project/.env.local
-    ```
+Examples:
+  
+```
+DOTENV=/home/user/.env.custom python manage.py
+# Uses this exact file; raises an error if not found
+ 
+DOTENV=~/myconfigs/myproject python manage.py
+DOTSTAGE=prod
+# Loads ~/myconfigs/myproject/.env.prod
+ 
+DOTENV=~/configs/project python manage.py  # calling load_env(stage='local')
+# Loads ~/configs/project/.env.local
+```
 
-**DOTPROJECT** — Quickly switch between project environments:
+#### **DOTPROJECT** — Quickly switch between project environments:
 
-    ```bash
-    DOTPROJECT=test python manage.py
-    # Loads: ~/.config/python-projects/test/.env
-    ```
+```bash
+DOTPROJECT=test python manage.py
+# Loads: ~/.config/python-projects/test/.env
+```
 
-**DOTSTAGE** — Select a configuration stage within a project (prod, staging, test):
+#### **DOTSTAGE** — Select a configuration stage within a project (prod, staging, test):
 
-    ```bash
-    DOTSTAGE=staging python manage.py
-    # Loads: ~/.config/python-projects/myproject/.env.staging
-    ```
+```bash
+DOTSTAGE=staging python manage.py
+# Loads: ~/.config/python-projects/myproject/.env.staging
+```
 
-**DOTCONFIG_ROOT** — Override the default configuration root directory:
+#### **DOTCONFIG_ROOT** — Override the default configuration root directory:
 
-    ```bash
-    DOTCONFIG_ROOT=~/myconfigs python manage.py
-    # Loads: ~/myconfigs/myproject/.env
-    ```
+```bash
+DOTCONFIG_ROOT=~/myconfigs python manage.py
+# Loads: ~/myconfigs/myproject/.env
+```
 
-**DOTVERBOSE** — Print the resolved path of the loaded .env file to stdout:
+#### **DOTVERBOSE** — Print the resolved path of the loaded .env file to stdout:
 
-    ```bash
-    DOTVERBOSE=1 python manage.py
-    # Output: Use DOTENV file from: /home/user/.config/python-projects/projectname/.env 
-    ```
+```bash
+DOTVERBOSE=1 python manage.py
+# Output: Use DOTENV file from: /home/user/.config/python-projects/projectname/.env 
+```
 
 
 ### Typical Directory Structure
@@ -150,14 +150,22 @@ You can control the behavior of dotenv-loader using the following environment va
 ```
 ~/.config/python-projects/
 └── myproject/
-    ├── .env          # Default configuration (typically a symlink to .env.prod)
-    ├── .env.prod     # Production configuration. Use explicitly with: DOTSTAGE=prod python manage.py
-    ├── .env.staging  # Staging configuration. Use explicitly with: DOTSTAGE=staging python manage.py
-    └── .env.test     # Testing configuration. Use explicitly with: DOTSTAGE=test python manage.py
+    ├── .env          # Default configuration (typically a symlink 
+    │                 # to .env.prod)
+    │ 
+    ├── .env.prod     # Production configuration. Use explicitly with:
+    │                 # DOTSTAGE=prod python manage.py
+    │ 
+    ├── .env.staging  # Staging configuration. Use explicitly with: 
+    │                 # DOTSTAGE=staging python manage.py
+    │ 
+    └── .env.test     # Testing configuration. Use explicitly with: 
+                      # DOTSTAGE=test python manage.py
 
 myproject/
 └── manage.py  # By default, loads ~/.config/python-projects/myproject/.env
-    .env       # Used only if no .env.* files are found in ~/.config/python-projects/myproject
+    .env       # Used only if no .env.* files are found in 
+               # ~/.config/python-projects/myproject
 ```
 
 ## 🧽 `.env` Resolution Rules and Precedence
@@ -178,6 +186,7 @@ myproject/
 2. **Relative Paths Are Context-Aware**
 
     - Paths defined in environment variables (e.g., `DOTENV`, `DOTCONFIG_ROOT`) are resolved relative to the current working directory (`PWD`, as seen with `pwd`).
+
     - Paths passed directly to `load_env()` (e.g., `dotenv`, `config_root`) are resolved relative to the calling script's location, adjusted by `steps_to_project_root`.
 
     For example, if manage.py is at `~/projects/proj1/app/manage.py` and `steps_to_project_root=1`, then project_root is considered to be `~/projects/proj1`.
