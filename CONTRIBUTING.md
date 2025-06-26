@@ -126,7 +126,7 @@ dotenv-loader/
 ├── requirements-dev.txt       # Dev dependencies
 ├── .gitignore
 ├── .coveragerc (optional)
-└── CONTRIBUTING.md             # This file
+└── CONTRIBUTING.md            # This file
 ```
 
 ---

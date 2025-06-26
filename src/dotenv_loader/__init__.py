@@ -18,13 +18,13 @@ def _resolve_path(path: Union[str, Path], base_path: Optional[Path] = None):
 
 
 def load_env(
-    project: Optional[str] = None,
-    stage: Optional[str] = None,
-    dotenv: Optional[Union[str, Path]] = None,
-    config_root: Optional[Union[str, Path]] = None,
-    steps_to_project_root: int = 0,
-    default_env_file: Optional[str] = None,
-    override: bool = True
+    project:               Optional[str]              = None,
+    stage:                 Optional[str]              = None,
+    dotenv:                Optional[Union[str, Path]] = None,
+    config_root:           Optional[Union[str, Path]] = None,
+    steps_to_project_root: int                        = 0,
+    default_env_filename:  Optional[str]              = None,
+    override:              bool                       = True
 ):
     """
     Load environment variables from a .env file with a flexible and hierarchical lookup strategy.
@@ -50,16 +50,16 @@ def load_env(
 
         stage (str, optional):
         ~~~~~~~~~~~~~~~~~~~~~~
-            Explicit staging suffix for the default_env_file if DOTSTAGE env var is not set. 
-            If None, the default_env_file parameter is used (e.g.: '.env'). With stage='test' or 
-            DOTSTAGE=test, the name of the default_env_file will be '.env.test'
+            Explicit staging suffix for the default_env_filename if DOTSTAGE env var is not set. 
+            If None, the default_env_filename parameter is used (e.g.: '.env'). With stage='test' or 
+            DOTSTAGE=test, the name of the default_env_filename will be '.env.test'
 
-        dotenv (str, optional):
+        dotenv (str | Path, optional):
         ~~~~~~~~~~~~~~~~~~~~~~~
             Explicit path to the dotenv file if DOTENV env var is not set. 
             If None, the .env file will be compiled from all other parameters
 
-        config_root (str, optional, default: '~/.config/python-projects'): 
+        config_root (str | Path, optional, default: '~/.config/python-projects'): 
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Base directory for storing .env files, defaults to '~/.config/python-projects'.
             Can be overridden via the DOTCONFIG_ROOT environment variable.
@@ -72,12 +72,12 @@ def load_env(
                - 1: One level above
                - 2: Two levels above, etc.
 
-        default_env_file (str, optional, default: ".env"): 
+        default_env_filename (str, optional, default: ".env"): 
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Base directory for storing .env files, defaults to '~/.config/python-projects'.
             Filename of the .env file. Defaults to '.env'.
 
-        override (bool, default: True): 
+        override (bool, optional, default: True): 
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Whether to overwrite existing environment variables already defined in os.environ. 
             Use False to preserve values already present (e.g. from OS or CI/CD), or True to 
@@ -117,60 +117,62 @@ def load_env(
 
             Explicit file override:
                 DOTENV=~/.env-custom python manage.py  # loads ~/.env-custom explicitly
-
     """
-
-    # Resolve the env file name
-    env_filename = Path(default_env_file or DEFAULT_ENV_FILENAME).name
-    
-    env_stage = Path(os.getenv("DOTSTAGE", stage or '')).name
-    if env_stage:
-       env_filename += f".{env_stage}"
+    # Create a prioritized list of candidate paths
+    candidate_paths = []
 
     # Determine the base directory based on steps_to_project_root
     caller_file = Path(inspect.stack()[1].filename).resolve()
     base_dir = caller_file.parents[steps_to_project_root]
 
-    # Determine the project name from environment or provided parameter
-    project_name = Path(os.getenv("DOTPROJECT", project or base_dir)).name
-
-    # Determine the configuration root directory
-    raw_config_root = os.getenv("DOTCONFIG_ROOT")
-    if raw_config_root:
-       config_root_path =_resolve_path(raw_config_root) 
-    else:
-       raw_config_root = (config_root or DEFAULT_CONFIG_ROOT)
-       config_root_path =_resolve_path(raw_config_root, base_dir)
+    # Resolve the env file name
+    env_filename = Path(default_env_filename or DEFAULT_ENV_FILENAME).name
+    env_stage = Path(os.getenv("DOTSTAGE", stage or '')).name
+    if env_stage:
+       env_filename += f".{env_stage}"
 
     # Check if user explicitly specified the .env file via DOTENV | dotenv
     enveron_dotenv = os.getenv("DOTENV")
+
+    explicit_env_path = None
     if enveron_dotenv:
        explicit_env_path = _resolve_path(enveron_dotenv) 
     elif dotenv:
        explicit_env_path = _resolve_path(dotenv, base_dir)
-    else:
-       explicit_env_path = None
 
-    # Create a prioritized list of candidate paths
-    candidate_paths = []
-
-    # Highest priority: explicitly provided .env file
     if explicit_env_path:
-        candidate_paths.append(explicit_env_path)
-    
-    # Second priority: standard config root + project name + env file
-    candidate_paths.append(config_root_path / project_name / env_filename)
+        if explicit_env_path.is_dir():
+            explicit_env_path = explicit_env_path / env_filename 
 
-    # Third priority: fallback to project directory's root
-    candidate_paths.append(base_dir / env_filename)
+        # Highest (and only the one) priority: explicitly provided .env file
+        candidate_paths.append(explicit_env_path)
+    else:
+        # Determine the project name from environment or provided parameter
+        project_name = Path(os.getenv("DOTPROJECT", project or base_dir)).name
+
+        # Determine the configuration root directory
+        raw_config_root = os.getenv("DOTCONFIG_ROOT")
+        if raw_config_root:
+           config_root_path =_resolve_path(raw_config_root) 
+        else:
+           raw_config_root = (config_root or DEFAULT_CONFIG_ROOT)
+           config_root_path =_resolve_path(raw_config_root, base_dir)
+
+        # Second priority: standard config root + project name + env file
+        candidate_paths.append(config_root_path / project_name / env_filename)
+
+        # Third priority: fallback to project directory's root
+        candidate_paths.append(base_dir / env_filename)
 
     # Try loading from the first existing candidate file
     for dotenv_path in candidate_paths:
         if dotenv_path.exists():
             if load_dotenv(dotenv_path, override=override):
+                if os.getenv("DOTVERBOSE"):
+                    print(f"Use DOTENV file from {dotenv_path}")
                 return dotenv_path
 
     # No file was found and loaded, raise an informative error
     searched_paths = ", ".join(str(path) for path in candidate_paths)
-    raise FileNotFoundError(f"No .env file found. Paths checked: {searched_paths}")
+    raise FileNotFoundError(f"No DOTENV file found. Paths checked: {searched_paths}")
 

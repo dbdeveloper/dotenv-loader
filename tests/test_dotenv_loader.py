@@ -29,6 +29,7 @@ def setup_dotconfig_root(monkeypatch) -> Path:
     monkeypatch.delenv("DOTPROJECT", raising=False)
     monkeypatch.delenv("DOTSTAGE", raising=False)
     monkeypatch.delenv("DOTENV", raising=False)
+    monkeypatch.delenv("DOTVERBOSE", raising=False)
 
     return config_root
 
@@ -91,19 +92,19 @@ def test_proj1_default_env_and_stage_param_loading(setup_dotconfig_root, monkeyp
     assert os.getenv("SETTING") == "local_other_proj1"
     assert env_path == tests_dir / "proj1/.env.other"
 
-def test_proj1_use_custom_default_env_file(setup_dotconfig_root, monkeypatch):
+def test_proj1_use_custom_default_env_filename(setup_dotconfig_root, monkeypatch):
     # Read a custom dotenv file
-    env_path = proj1_load_env(default_env_file="./custom.env")
+    env_path = proj1_load_env(default_env_filename="./custom.env")
     assert os.getenv("SETTING") == "custom_env_proj1"
     assert env_path == setup_dotconfig_root / "proj1/custom.env"
 
     # Use Path instead of string 
-    env_path = proj1_load_env(default_env_file=Path("./custom.env"))
+    env_path = proj1_load_env(default_env_filename=Path("./custom.env"))
     assert os.getenv("SETTING") == "custom_env_proj1"
     assert env_path == setup_dotconfig_root / "proj1/custom.env"
 
-def test_proj1_use_custom_dotenv_file_with_param(setup_dotconfig_root, monkeypatch):
-    # Read a custom dotenv file
+def test_proj1_use_unique_dotenv_file_with_param(setup_dotconfig_root, monkeypatch):
+    # Read a unique user-defined dotenv file
     # NOTE: The relative path resolved using the path to project_root=proj1 as working directory
     env_path = proj1_load_env(dotenv="../other_config_root/other-proj/.env")
     assert os.getenv("SETTING") == "other_default_other_proj"
@@ -119,25 +120,139 @@ def test_proj1_use_custom_dotenv_file_with_param(setup_dotconfig_root, monkeypat
     assert os.getenv("SETTING") == "default_proj1"
     assert env_path == setup_dotconfig_root / "proj1/.env"
 
-    # Use empty Path instead of empty string 
-    env_path = proj1_load_env(dotenv=Path("."))
-    assert os.getenv("SETTING") == "default_proj1"
-    assert env_path == setup_dotconfig_root / "proj1/.env"
+    # Use empty Path instead of empty string
+    # Empty Path() is equal to Path('.')
+    env_path = proj1_load_env(dotenv=Path(""))
+    assert os.getenv("SETTING") == "local_proj1"
+    assert env_path == tests_dir / "proj1/.env"
 
-def test_proj1_use_custom_dotenv_file_with_env_perf_param(setup_dotconfig_root, monkeypatch):
-    # Read a custom dotenv file. Environment variables has preference on the function parameters
+def test_proj1_use_unique_dotenv_file_with_env_perf_param(setup_dotconfig_root, monkeypatch):
+    # Read a unique user-defined dotenv file. Environment variables has preference on the function parameters
     monkeypatch.setenv("DOTENV", "tests/proj1/.env.other")
     env_path = proj1_load_env(dotenv="../other_config_root/other-proj/.env")
     assert os.getenv("SETTING") == "local_other_proj1"
     assert env_path == tests_dir / "proj1/.env.other"
 
-def test_proj1_use_custom_dotenv_file_with_env(setup_dotconfig_root, monkeypatch):
-    # Read a custom dotenv file. 
+def test_proj1_use_unique_dotenv_file_with_env(setup_dotconfig_root, monkeypatch):
+    # Read a unique user-defined dotenv file. 
     # NOTE: The working directory is a directory from where pytest is started
     monkeypatch.setenv("DOTENV", "tests/other_config_root/other-proj/.env")
     env_path = proj1_load_env()
     assert os.getenv("SETTING") == "other_default_other_proj"
     assert env_path == tests_dir / "other_config_root/other-proj/.env"
+
+def test_proj2_use_unique_dotenv_file_with_param(setup_dotconfig_root, monkeypatch):
+    # read a custom dotenv file. 
+    # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
+    env_path = proj2_load_env(dotenv="./custom.env")
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    env_path = proj2_load_env(dotenv=Path("./custom.env"))
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    env_path = proj2_load_env(steps_to_project_root=1, dotenv="./app/custom.env")
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    env_path = proj2_load_env(steps_to_project_root=1, dotenv=Path("./app/custom.env"))
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+def test_proj2_use_unique_dotenv_file_with_custom_default_env_filename_param(setup_dotconfig_root, monkeypatch):
+    # read a custom dotenv file. 
+    # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
+    env_path = proj2_load_env(dotenv=".", default_env_filename="custom.env")
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    env_path = proj2_load_env(dotenv=Path(""), default_env_filename=Path("blabla/custom.env"))
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    env_path = proj2_load_env(steps_to_project_root=1, dotenv="./app", default_env_filename='custom.env')
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+def test_proj2_use_unique_dotenv_file_with_custom_default_env_filename_env(setup_dotconfig_root, monkeypatch):
+    # read a custom dotenv file. 
+    # NOTE:  The relative path resolved using the directory where pytest is executed (root project directory)
+
+    monkeypatch.setenv("DOTENV", "./tests/proj2/app")
+    env_path = proj2_load_env(default_env_filename="custom.env")
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    monkeypatch.setenv("DOTENV", "./tests/proj2/app")
+    env_path = proj2_load_env(steps_to_project_root=1, dotenv="wrong-dir", default_env_filename='custom.env')
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    monkeypatch.setenv("DOTENV", "./tests/proj2/app/custom.env")
+    env_path = proj2_load_env(steps_to_project_root=1, dotenv="wrong-dir", default_env_filename='.env')
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+
+def test_pro1_use_unique_dotenv_file_with_custom_default_env_filename_param(setup_dotconfig_root, monkeypatch):
+    env_path = proj1_load_env(dotenv=".", stage='other')
+    assert os.getenv("SETTING") == "local_other_proj1"
+    assert env_path == tests_dir / "proj1/.env.other"
+
+def test_pro1_use_unique_dotenv_file_with_stage_param(setup_dotconfig_root, monkeypatch):
+    monkeypatch.setenv("DOTSTAGE", "other")
+    env_path = proj1_load_env(dotenv=".", stage='')
+    assert os.getenv("SETTING") == "local_other_proj1"
+    assert env_path == tests_dir / "proj1/.env.other"
+
+    # DOTSTAGE env variable is empty but defined, use "default" DOTSTAGE:
+    monkeypatch.setenv("DOTSTAGE", "")
+    env_path = proj1_load_env(dotenv=".", stage='other')
+    assert os.getenv("SETTING") == "local_proj1"
+    assert env_path == tests_dir / "proj1/.env"
+
+    # Use unique filename (.env), so DOTSTAGE is ignoring
+    monkeypatch.setenv("DOTSTAGE", "other")
+    env_path = proj1_load_env(dotenv=".env")
+    assert os.getenv("SETTING") == "local_proj1"
+    assert env_path == tests_dir / "proj1/.env"
+
+def test_pro1_use_unique_dotenv_file_with_stage_env(setup_dotconfig_root, monkeypatch):
+    monkeypatch.setenv("DOTENV", "./tests/proj1")
+    env_path = proj1_load_env(steps_to_project_root=2, dotenv="wrong-dir/wrong-env")
+    assert os.getenv("SETTING") == "local_proj1"
+    assert env_path == tests_dir / "proj1/.env"
+
+    monkeypatch.setenv("DOTENV", "./tests/proj1")
+    monkeypatch.setenv("DOTSTAGE", "other")
+    env_path = proj1_load_env(steps_to_project_root=3, dotenv="wrong-dir/.env")
+    assert os.getenv("SETTING") == "local_other_proj1"
+    assert env_path == tests_dir / "proj1/.env.other"
+
+def test_proj2_use_unique_dotenv_file_with_env(setup_dotconfig_root, monkeypatch):
+    # read a custom dotenv file using DOTENV environment variable
+    monkeypatch.setenv("DOTENV", "tests/proj2/app/custom.env")
+    env_path = proj2_load_env()
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+    monkeypatch.setenv("DOTENV", "tests/proj2/app/")
+    env_path = proj2_load_env(default_env_filename='custom.env')
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
+    assert env_path == tests_dir / "proj2/app/custom.env"
+
+def test_proj2_wrong_unique_dotenv_file_with_param2(setup_dotconfig_root, monkeypatch):
+    # read a custom dotenv file. 
+    # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
+    with pytest.raises(FileNotFoundError):
+       env_path = proj2_load_env(steps_to_project_root=0, dotenv=".")
+
+    with pytest.raises(FileNotFoundError):
+       env_path = proj2_load_env(steps_to_project_root=0, dotenv=Path())
+
+    with pytest.raises(FileNotFoundError):
+       env_path = proj2_load_env(steps_to_project_root=1, dotenv="./app")
 
 def test_proj2_error_wrong_step_to_project_root(setup_dotconfig_root, monkeypatch):
     # proj2 has two directory levels:  proj2/app/.
@@ -186,47 +301,40 @@ def test_proj2_default_env_with_stage_env_loading(setup_dotconfig_root, monkeypa
     assert os.getenv("SETTING") == "test_proj2"
     assert env_path == setup_dotconfig_root / "proj2/.env.test"
 
-def test_proj2_use_custom_dotenv_file_with_param(setup_dotconfig_root, monkeypatch):
+def test_proj2_use_custom_default_env_filename_with_param(setup_dotconfig_root, monkeypatch):
     # read a custom dotenv file
-    env_path = proj2_load_env(default_env_file="custom.env")
-    assert os.getenv("SETTING") == "custom_dotenv"
+    env_path = proj2_load_env(default_env_filename="custom.env")
+    assert os.getenv("SETTING") == "local_custom_dotenv_proj2"
     assert env_path == tests_dir / "proj2/app/custom.env"
 
-def test_proj2_use_custom_default_env_file_with_param2(setup_dotconfig_root, monkeypatch):
+def test_proj1_use_custom_default_env_filename_with_param2(setup_dotconfig_root, monkeypatch):
     # read a custom dotenv file: use only the name. All path will be truncated
-    env_path = proj2_load_env(default_env_file="/bla/bla/custom.env")
-    assert os.getenv("SETTING") == "custom_dotenv"
-    assert env_path == tests_dir / "proj2/app/custom.env"
 
-def test_proj2_use_custom_default_env_file_and_project_param(setup_dotconfig_root, monkeypatch):
+    env_path = proj1_load_env(default_env_filename="/bla/bla/custom.env")
+    assert os.getenv("SETTING") == "custom_env_proj1"
+    assert env_path == setup_dotconfig_root / "proj1/custom.env"
+
+def test_proj2_use_custom_default_env_filename_with_param3(setup_dotconfig_root, monkeypatch):
     # read a custom dotenv file: use only the name. All path will be truncated
-    env_path = proj2_load_env(project="proj1", default_env_file="custom.env")
+    # for proj2 there is no custom env-file in the path:
+    with pytest.raises(FileNotFoundError):
+        env_path = proj2_load_env(steps_to_project_root=1, default_env_filename="/bla/bla/custom.env")
+
+def test_proj2_use_custom_default_env_filename_and_project_param(setup_dotconfig_root, monkeypatch):
+    # read a custom dotenv file: use only the name. All path will be truncated
+    env_path = proj2_load_env(project="proj1", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "custom_env_proj1"
     assert env_path == setup_dotconfig_root / "proj1/custom.env"
 
     monkeypatch.setenv("DOTPROJECT", "proj1")
-    env_path = proj2_load_env(project="proj2", default_env_file="custom.env")
+    env_path = proj2_load_env(project="proj2", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "custom_env_proj1"
     assert env_path == setup_dotconfig_root / "proj1/custom.env"
 
     monkeypatch.setenv("DOTPROJECT", "proj1")
-    env_path = proj2_load_env(project="proj2", stage='test', default_env_file="custom.env")
+    env_path = proj2_load_env(project="proj2", stage='test', default_env_filename="custom.env")
     assert os.getenv("SETTING") == "custom_env_test_proj1"
     assert env_path == setup_dotconfig_root / "proj1/custom.env.test"
-
-def test_proj2_use_custom_dotenv_file_with_param(setup_dotconfig_root, monkeypatch):
-    # read a custom dotenv file. 
-    # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
-    env_path = proj2_load_env(dotenv="./custom.env")
-    assert os.getenv("SETTING") == "custom_dotenv"
-    assert env_path == tests_dir / "proj2/app/custom.env"
-
-def test_proj2_use_custom_dotenv_file_with_env(setup_dotconfig_root, monkeypatch):
-    # read a custom dotenv file using DOTENV environment variable
-    monkeypatch.setenv("DOTENV", "tests/proj2/app/custom.env")
-    env_path = proj2_load_env()
-    assert os.getenv("SETTING") == "custom_dotenv"
-    assert env_path == tests_dir / "proj2/app/custom.env"
 
 def test_proj1_use_custom_config_root_with_param(setup_dotconfig_root, monkeypatch):
     # read a custom dotenv file from the different config root. 
@@ -298,12 +406,12 @@ def test_proj2_use_custom_config_root_and_projectname_with_env_var(setup_dotconf
 def test_proj1_use_custom_config_root_and_custom_env_file_name(setup_dotconfig_root, monkeypatch):
     # read a custom dotenv file from the different config root. 
     # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
-    env_path = proj1_load_env(config_root="../other_config_root", default_env_file="custom.env")
+    env_path = proj1_load_env(config_root="../other_config_root", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "other_custom_env_default_proj1"
     assert env_path == tests_dir / "other_config_root/proj1/custom.env"
 
     # With stage='test':
-    env_path = proj1_load_env(stage="test", config_root="../other_config_root", default_env_file="custom.env")
+    env_path = proj1_load_env(stage="test", config_root="../other_config_root", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "other_custom_env_test_proj1"
     assert env_path == tests_dir / "other_config_root/proj1/custom.env.test"
 
@@ -311,14 +419,28 @@ def test_proj1_use_custom_config_root_and_custom_env_file_name_env_vars(setup_do
     # read a custom dotenv file from the different config root. 
     # NOTE:  The relative path resolved using the path to proj2/manage.py as an active directory
     monkeypatch.setenv("DOTCONFIG_ROOT", "tests/other_config_root")
-    env_path = proj1_load_env(config_root="wrong-path-to/other_config_root", default_env_file="custom.env")
+    env_path = proj1_load_env(config_root="wrong-path-to/other_config_root", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "other_custom_env_default_proj1"
     assert env_path == tests_dir / "other_config_root/proj1/custom.env"
 
     # With stage='test':
     monkeypatch.setenv("DOTCONFIG_ROOT", "tests/other_config_root")
     monkeypatch.setenv("DOTSTAGE", "test")
-    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_file="custom.env")
+    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "other_custom_env_test_proj1"
     assert env_path == tests_dir / "other_config_root/proj1/custom.env.test"
 
+def test_verbose_env(setup_dotconfig_root, monkeypatch, capsys):
+    # Test no verbose output
+    monkeypatch.setenv("DOTCONFIG_ROOT", "tests/other_config_root")
+    monkeypatch.setenv("DOTSTAGE", "test")
+    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_filename="custom.env")
+    captured = capsys.readouterr()
+    assert captured.out.strip() == ""
+
+    # Test verbose output
+    monkeypatch.setenv("DOTVERBOSE", "1")
+    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_filename="custom.env")
+    dotenv_path = tests_dir / "other_config_root/proj1/custom.env.test"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
