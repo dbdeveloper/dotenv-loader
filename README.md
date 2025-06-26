@@ -104,7 +104,7 @@ You can control the behavior of dotenv-loader using the following environment va
     
 Examples:
   
-```
+```bash
 DOTENV=/home/user/.env.custom python manage.py
 # Uses this exact file; raises an error if not found
  

@@ -181,7 +181,7 @@ Steps 1,2,3 can be automated by executing the script `tools/publish.sh`
 Your `ci.yml` workflow ensures:
 
 - Tests are run on every `push` and `pull_request`.
-- Uses Python 3.12.
+- Uses Python 3.8+
 - Fails early if tests do not pass.
 
 You can enable code coverage via `codecov.io` for 100% badges.
