@@ -250,7 +250,7 @@ myproject/
     where:
     
     - `default_env_filename` is `.env` by default
-    - `STAGE` comes from `DOTSTAGE`or `stage`9 (if defined)
+    - `STAGE` comes from `DOTSTAGE`or `stage` (if defined)
 
 7. **Primary Search Location**
 
