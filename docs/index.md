@@ -3,23 +3,44 @@ title: Main
 ---
 # dotenv-loader
 
-Smart and flexible `.env` loader for Python applications.
+Flexible and secure .env loader for Python projects with support for environment switching, nested project structures, and external configuration directories.
+
+## 📚 Table of Contents
+- [Overview](#-overview)
+- [Historical Context](#-historical-context)
+- [Features](#-features)
+- [Security and Best Practices](#-security-and-best-practices)
+- [Installation](#️-installation)
+- [Python Compatibility](#-python-compatibility)
+- [Usage](#-usage)
+  - [Basic Usage](#basic-usage)
+  - [Advanced Usage](#advanced-usage)
+  - [Environment Variables](#environment-variables)
+  - [Typical Directory Structure](#typical-directory-structure)
+- [.env Resolution Rules and Precedence](#-env-resolution-rules-and-precedence)
+- [Use Cases](#-use-cases)
+- [License](#-license)
+- [Contributing](#-contributing)
+- [Acknowledgments](#-acknowledgments)
+- [Changelog](#-changelog)
 
 
 ## 📖 Overview
 
-**dotenv-loader** provides a flexible yet straightforward way to load environment variables from `.env` files, tailored specifically for Python applications, including Django, Flask, Celery, FastCGI, WSGI, CLI tools, and more. It supports hierarchical configuration, making it extremely convenient to manage multiple environments (development, testing, production) without manually switching `.env` files or cluttering code with environment-specific logic.
+**dotenv-loader** ([Git](https://github.com/dbdeveloper/dotenv-loader), [PyPI](https://pypi.org/project/dotenv-loader/)) provides a flexible yet straightforward way to load environment variables from `.env` files, tailored specifically for Python applications, including Django, Flask, Celery, FastCGI, WSGI, CLI tools, and more. It supports hierarchical configuration, making it extremely convenient to manage multiple environments (development, testing, production) without manually switching `.env` files or cluttering code with environment-specific logic.
 
 
 ## 🚀 Historical Context
 
-Managing environment-specific settings is crucial in modern software development. Standard solutions like [python-dotenv](https://github.com/theskumar/python-dotenv) simplify loading variables from `.env` files but lack flexible mechanisms for dynamically switching configurations across multiple deployment environments or nested project structures.
+Managing environment-specific settings is crucial in modern software development. The excellent [python-dotenv](https://pypi.org/project/python-dotenv/) package provides robust and versatile `.env` file loading functionality, but it lacks flexible mechanisms for dynamically switching configurations across multiple deployment environments or nested project structures.
 
-dotenv-loader was created specifically to solve these practical challenges:
+**dotenv-loader** is built upon `python-dotenv`, enhancing it specifically to address the following practical challenges:
 
-- Easily switch environments without changing code or manually managing environment variables.
-- Support flexible directory structures (such as monorepos or Django sub-applications).
-- Enable clear separation of environment-specific configurations, improving clarity and reducing human error.
+- Dynamically switch environments without modifying code or manually managing environment variables.
+- Support flexible directory structures, such as monorepos or Django sub-applications.
+- Provide clear, hierarchical separation of environment-specific configurations to improve clarity and reduce human error.
+
+While **dotenv-loader** specializes in dynamic and hierarchical environment selection tailored for specific deployment scenarios, **python-dotenv** offers broader and more general-purpose capabilities. Users whose needs aren't fully met by `dotenv-loader` are strongly encouraged to leverage `python-dotenv`'s comprehensive functionality directly.
 
 
 ## ✨ Features
@@ -52,11 +73,11 @@ This package is tested on the following Python versions via GitHub Actions:
 
 | Python version | Status       |
 |----------------|--------------|
-| 3.8            | ✅ Supported |
 | 3.9            | ✅ Supported |
 | 3.10           | ✅ Supported |
 | 3.11           | ✅ Supported |
 | 3.12           | ✅ Supported |
+| 3.13           | ✅ Supported |
 
 > Automated tests are run on every push and pull request to ensure consistent support.
 
