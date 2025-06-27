@@ -14,7 +14,7 @@ If you plan to submit a pull request or maintain the package — **this is your 
 
 ## 🧩 Requirements
 
-- Python **3.8 or higher**
+- Python **3.9 or higher**
 - Git
 - `pip` (Python package manager)
 - Unix-like system recommended (Linux/macOS) — but Windows is supported.
@@ -181,7 +181,7 @@ Steps 1,2,3 can be automated by executing the script `tools/publish.sh`
 Your `ci.yml` workflow ensures:
 
 - Tests are run on every `push` and `pull_request`.
-- Uses Python 3.8+
+- Uses Python 3.9+
 - Fails early if tests do not pass.
 
 You can enable code coverage via `codecov.io` for 100% badges.
