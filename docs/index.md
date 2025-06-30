@@ -91,30 +91,63 @@ By default, dotenv-loader automatically identifies the `.env` file from the curr
 ```python
 import dotenv_loader
 
-dotenv_loader.load_env()
+dotenv_loader.load_env()  # Locate the resolved .env file and populate os.environ with its variables
 ```
 
 
 ### Advanced Usage
 
 ```python
-import dotenv_loader
+from dotenv_loader import load_env
 
-# Load environment with custom default settings 
-# Each parameter is optional and first four can be overridden by environment variables:
-dotenv_loader.load_env(
-    project='mega-project',          # - explicitly set project name
-    stage='production',              # - explicitly set stage name
-    dotenv='./dir/.env.test'         # - explicitly set .env file 
-    config_root='~/custom-configs',  # - custom config directory
-    steps_to_project_root=1,         # - how many directories up to look for project root
-    default_env_filename='env',      # - change the default '.env' name to you name
-    override=True                    # - whether to overwrite existing environment variables 
-                                     #   already defined in os.environ. Use False to preserve 
-                                     #   values already present (e.g. from OS or CI/CD), or 
-                                     #   True to always prefer .env contents.
+# Load environment with custom default settings:
+load_env(
+    project='mega-project',           # - explicitly set project name
+    stage='production',               # - explicitly set stage name
+    dotenv='./dir/.env.test'          # - explicitly set .env file 
+    config_root='~/custom-configs',   # - custom config directory
+    steps_to_project_root=1,          # - how many directories up to look for project root
+    default_env_filename='custom.env',# - change the default '.env' name to you name
+    override=True,                    # - whether to overwrite existing environment variables in `os.environ`
+    dry_run=True                      # - if True, only return the resolved .env path without loading it
 )
 ```
+
+
+### Dry-run Usage
+
+Use dry-run mode when you want to inspect or parse the .env file manually (e.g., without modifying the environment):
+
+```
+from dotenv_loader import load_env
+from dotenv import dotenv_values
+
+env_file = load_env(dry_run=True)  # Return the resolved .env file path without applying it to os.environ 
+
+if env_file:
+   config = dotenv_values(env_file)  # Load variables into a dict without affecting the environment
+                                     # config = {"USER": "foo", "EMAIL": "foo@example.org"}
+else:
+  raise FileNotFoundError(".env file was not found!")
+```
+
+
+### Parameters of `load_env()`
+
+The `load_env()` function accepts the following optional parameters:
+
+|N| Parameter              | Type                      | Description |
+|-|------------------------|---------------------------|-------------|
+|1| `project`              | `str`                     | Explicit project name to use. Overrides automatic detection from directory name. |
+|2| `stage`                | `str`                     | Environment stage (e.g., `prod`, `dev`, `test`). Combined with filename to locate `.env`, eg.: `.env[.${stage}]`. |
+|3| `dotenv`               | `str` or `Path`           | Explicit path to `.env` file or directory. If a file is given and not found, raises `FileNotFoundError`. |
+|4| `config_root`          | `str` or `Path`           | Override the default configuration root directory (`~/.config/python-projects`). |
+|5| `steps_to_project_root`| `int`                     | How many parent directories to traverse when resolving the project root (default value is 0) |
+|6| `default_env_filename` | `str`                     | The base filename to use instead of default `.env` (e.g., `"custom.env"` → `custom.env.test`). |
+|7| `override`             | `bool` (default: `True`)  | Whether to overwrite existing environment variables already defined in os.environ. Use False to preserve values already present (e.g. from OS or CI/CD), or True to always prefer .env contents. |
+|8| `dry_run`              | `bool` (default: `False`) | If `True`, does not load anything — only returns the path to the `.env` file if found, or `None` otherwise. Useful for inspection or custom loading logic. |
+
+> **⚠️  Note:** Each parameter is optional and first four parameters (`project`, `stage`, `dotenv` and `config_root`) can also be controlled via environment variables: `DOTPROJECT`, `DOTSTAGE`, `DOTENV`, and `DOTCONFIG_ROOT`, respectively.
 
 
 ### Environment Variables
@@ -167,6 +200,12 @@ DOTCONFIG_ROOT=~/myconfigs python manage.py
 DOTVERBOSE=1 python manage.py
 # Output: Use DOTENV file from: /home/user/.config/python-projects/projectname/.env 
 ```
+
+> **⚠️ Note**  
+> Unlike other dotenv-loader variables, `DOTVERBOSE` doesn't influence the selection of the `.env` file — it only controls whether its path is printed to stdout.  
+> This makes it safe and convenient to define `DOTVERBOSE` inside your `.env` file (e.g. during development) to always see which file was loaded.  
+> Supported truthy values (case-insensitive): `'1'`, `'true'`, `'yes'`, `'on'`, `'ja'`.  
+> **The `DOTVERBOSE` environment variable takes precedence over the value defined in the `.env` file.**
 
 
 ### Typical Directory Structure
@@ -233,12 +272,10 @@ myproject/
     - If `DOTPROJECT` or `project` is defined, its basename is used
     - Otherwise, it defaults to the basename of the computed `project_root` directory
 
-    **Note:**
-    
-    The `project_root` is computed relative to the file that **directly calls** `load_env()`, using the `steps_to_project_root` parameter.
-    
-    - If `steps_to_project_root=0` (default), `project_root` is the directory containing the calling file
-    - If `steps_to_project_root=1`, it's the parent of that directory, and so on
+    > **⚠️ Note:**
+    > The `project_root` is computed relative to the file that **directly calls** `load_env()`, using the `steps_to_project_root` parameter.
+    > - If `steps_to_project_root=0` (default), `project_root` is the directory containing the calling file
+    > - If `steps_to_project_root=1`, it's the parent of that directory, and so on
     
     For example:
     
