@@ -108,8 +108,9 @@ load_env(
     config_root='~/custom-configs',   # - custom config directory
     steps_to_project_root=1,          # - how many directories up to look for project root
     default_env_filename='custom.env',# - change the default '.env' name to you name
-    override=True,                    # - whether to overwrite existing environment variables in `os.environ`
-    dry_run=True                      # - if True, only return the resolved .env path without loading it
+    override=True,                    # - whether to overwrite existing values in os.environ
+    dry_run=True                      # - if True, only return the resolved .env path without
+                                      #   loading it
 )
 ```
 
@@ -118,14 +119,15 @@ load_env(
 
 Use dry-run mode when you want to inspect or parse the .env file manually (e.g., without modifying the environment):
 
-```
+```python
 from dotenv_loader import load_env
 from dotenv import dotenv_values
 
-env_file = load_env(dry_run=True)  # Return the resolved .env file path without applying it to os.environ 
-
+env_file = load_env(dry_run=True)  # Return the resolved .env file path without applying
+                                   # it to os.environ 
 if env_file:
-   config = dotenv_values(env_file)  # Load variables into a dict without affecting the environment
+   config = dotenv_values(env_file)  # Load variables into a dict without affecting the
+                                     # environment:
                                      # config = {"USER": "foo", "EMAIL": "foo@example.org"}
 else:
   raise FileNotFoundError(".env file was not found!")
