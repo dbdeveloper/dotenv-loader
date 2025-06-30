@@ -1,6 +1,6 @@
 [project]
 name = "dotenv-loader"
-version = "1.0.3"
+version = "1.0.4"
 description = "Flexible and secure .env loader for Python projects with support for environment switching, nested project structures, and external configuration directories."
 authors = [{name="Vladyslav Kozlovskyy", email="dbdevelop@gmail.com"}]
 readme = "README.md"

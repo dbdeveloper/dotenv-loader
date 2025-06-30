@@ -30,6 +30,7 @@ def setup_dotconfig_root(monkeypatch) -> Path:
     monkeypatch.delenv("DOTSTAGE", raising=False)
     monkeypatch.delenv("DOTENV", raising=False)
     monkeypatch.delenv("DOTVERBOSE", raising=False)
+    monkeypatch.delenv("SETTING", raising=False)
 
     return config_root
 
@@ -261,6 +262,29 @@ def test_proj2_error_wrong_step_to_project_root(setup_dotconfig_root, monkeypatc
     with pytest.raises(FileNotFoundError):
        env_path = proj2_load_env()
 
+def test_proj2_dry_run_when_path_is_wrong(setup_dotconfig_root, monkeypatch, capsys):
+    env_path = proj2_load_env(dry_run=True)
+    assert os.getenv("SETTING") is None
+    assert env_path is None
+
+    monkeypatch.setenv("DOTVERBOSE", "ON")
+    env_path = proj2_load_env(dry_run=True)
+    captured = capsys.readouterr()
+    dotenv_path1 = setup_dotconfig_root / "app/.env"
+    dotenv_path2 = tests_dir / "proj2/app/.env"
+
+    assert os.getenv("SETTING") is None
+    assert env_path is None
+    assert captured.out.strip() == f"No DOTENV file found. Paths checked: {dotenv_path1}, {dotenv_path2}"
+
+def test_proj2_dry_run(setup_dotconfig_root, monkeypatch):
+    # run load_env() in the `dry_run` mode
+    env_path = proj2_load_env(steps_to_project_root=1, dry_run=True)
+    # load nothing
+    assert os.getenv("SETTING") is None
+    # return the path to the detected .env file
+    assert env_path == setup_dotconfig_root / "proj2/.env"
+
 def test_proj2_default_env_loading(setup_dotconfig_root, monkeypatch):
     # read .env file from the default position
     env_path = proj2_load_env(steps_to_project_root=1)
@@ -426,21 +450,116 @@ def test_proj1_use_custom_config_root_and_custom_env_file_name_env_vars(setup_do
     # With stage='test':
     monkeypatch.setenv("DOTCONFIG_ROOT", "tests/other_config_root")
     monkeypatch.setenv("DOTSTAGE", "test")
-    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_filename="custom.env")
+    env_path = proj1_load_env(stage="prod", config_root="wrong-path-to/other_config_root", default_env_filename="custom.env")
     assert os.getenv("SETTING") == "other_custom_env_test_proj1"
     assert env_path == tests_dir / "other_config_root/proj1/custom.env.test"
 
 def test_verbose_env(setup_dotconfig_root, monkeypatch, capsys):
-    # Test no verbose output
     monkeypatch.setenv("DOTCONFIG_ROOT", "tests/other_config_root")
-    monkeypatch.setenv("DOTSTAGE", "test")
-    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_filename="custom.env")
+
+    # Test no verbose output
+    env_path = proj1_load_env()
     captured = capsys.readouterr()
     assert captured.out.strip() == ""
 
-    # Test verbose output
+    # Test verbose output  1
     monkeypatch.setenv("DOTVERBOSE", "1")
-    env_path = proj1_load_env(stage="prod", config_root="../other_config_root", default_env_filename="custom.env")
-    dotenv_path = tests_dir / "other_config_root/proj1/custom.env.test"
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
     captured = capsys.readouterr()
     assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  True
+    monkeypatch.setenv("DOTVERBOSE", "True")
+    env_path = proj1_load_env(config_root="wrong/other_config_root")  # use DOTCONFIG_ROOT
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  TRUE
+    monkeypatch.setenv("DOTVERBOSE", "TRUE")
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  true
+    monkeypatch.setenv("DOTVERBOSE", "true")
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  tRuE
+    monkeypatch.setenv("DOTVERBOSE", "tRuE")
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  Yes
+    monkeypatch.setenv("DOTVERBOSE", "Yes")
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  ON
+    monkeypatch.setenv("DOTVERBOSE", "ON")
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+    # Test verbose output  ja
+    monkeypatch.setenv("DOTVERBOSE", "ja")
+    env_path = proj1_load_env()
+    dotenv_path = tests_dir / "other_config_root/proj1/.env"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {dotenv_path}"
+
+
+    # Test no verbose output  false
+    monkeypatch.setenv("DOTVERBOSE", "false")
+    env_path = proj1_load_env()
+    captured = capsys.readouterr()
+    assert captured.out.strip() == ""
+
+    # Test no verbose output  any-other-text
+    monkeypatch.setenv("DOTVERBOSE", "any-other-text")
+    env_path = proj1_load_env()
+    captured = capsys.readouterr()
+    assert captured.out.strip() == ""
+
+def test_verbose_from_env_file(setup_dotconfig_root, monkeypatch, capsys):
+    monkeypatch.setenv("DOTCONFIG_ROOT", "tests/other_config_root")
+    monkeypatch.setenv("DOTSTAGE", "test")
+
+    # Test verbose output from the custom.env.test file (DOTVERBOSE=True)
+    monkeypatch.delenv("DOTVERBOSE", raising=False)
+    env_path = proj1_load_env(stage="test", config_root="wrond/other_config_root", default_env_filename="custom.env")
+    dotenv_path = tests_dir / "other_config_root/proj1/custom.env.test"
+    captured = capsys.readouterr()
+    assert env_path == dotenv_path
+    assert captured.out.strip() == f"Use DOTENV file from {env_path}"
+
+    # Test verbose output from the .env.test file (DOTVERBOSE=False)
+    monkeypatch.delenv("DOTVERBOSE", raising=False)
+    env_path = proj1_load_env(stage="test")
+    dotenv_path = tests_dir / "other_config_root/proj1/.env.test"
+    captured = capsys.readouterr()
+    assert env_path == dotenv_path
+    assert captured.out.strip() == ""
+
+    # The DOTVERBOSE environment variable takes precedence over DOTVERBOSE defined in a .env file:
+    monkeypatch.setenv("DOTVERBOSE", "wrong-value-disable-dotverbose")
+    env_path = proj1_load_env(stage="test", config_root="wrond/other_config_root", default_env_filename="custom.env")
+    dotenv_path = tests_dir / "other_config_root/proj1/custom.env.test"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == ""
+
+    monkeypatch.setenv("DOTVERBOSE", "Ja")
+    env_path = proj1_load_env(stage="test")
+    captured = capsys.readouterr()
+    assert captured.out.strip() == f"Use DOTENV file from {env_path}"
+

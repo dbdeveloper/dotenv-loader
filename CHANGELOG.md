@@ -1,6 +1,15 @@
 # Changelog
 
 
+## [1.0.4] – 2025-06-30
+
+### Added
+- New `dry_run` parameter in `load_env()`: allows retrieving the resolved `.env` file path without loading it. Useful for inspection or integration with external tools.
+
+### Changed
+- `DOTVERBOSE` is now a boolean-like variable and accepts the following case-insensitive truthy values: `'1'`, `'true'`, `'yes'`, `'on'`, `'ja'`.
+
+
 ## [1.0.3] – 2025-06-27
 
 ### Added

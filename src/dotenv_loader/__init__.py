@@ -17,6 +17,13 @@ def _resolve_path(path: Union[str, Path], base_path: Optional[Path] = None):
     else:                  return path.resolve()
 
 
+def _str_to_bool(value: str) -> bool:
+    """ Change the string value (such as 'yes', 'Yes', 'YES', '1', 'Ja', etc.)
+        to bool value = True, otherwise - False
+    """
+    return str(value).strip().lower() in ('1', 'true', 'yes', 'on', 'ja')
+
+
 def load_env(
     project:               Optional[str]              = None,
     stage:                 Optional[str]              = None,
@@ -24,7 +31,8 @@ def load_env(
     config_root:           Optional[Union[str, Path]] = None,
     steps_to_project_root: int                        = 0,
     default_env_filename:  Optional[str]              = None,
-    override:              bool                       = True
+    override:              bool                       = True,
+    dry_run:               bool                       = False
 ):
     """
     Load environment variables from a .env file with a flexible and hierarchical lookup strategy.
@@ -78,10 +86,17 @@ def load_env(
             Filename of the .env file. Defaults to '.env'.
 
         override (bool, optional, default: True): 
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             Whether to overwrite existing environment variables already defined in os.environ. 
             Use False to preserve values already present (e.g. from OS or CI/CD), or True to 
             always prefer .env contents.
+
+        dry_run (bool, optional, default: False):
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            Locate the .env file without loading it. load_env() returns the path to the 
+            discovered .env file or None, which can then be used by other libraries for
+            loading.
+
 
     Returns:
         pathlib.Path: 
@@ -164,15 +179,26 @@ def load_env(
         # Third priority: fallback to project directory's root
         candidate_paths.append(base_dir / env_filename)
 
+    dotverbose_from_env = os.getenv("DOTVERBOSE")
+
     # Try loading from the first existing candidate file
     for dotenv_path in candidate_paths:
         if dotenv_path.exists():
-            if load_dotenv(dotenv_path, override=override):
-                if os.getenv("DOTVERBOSE"):
+            if dry_run or load_dotenv(dotenv_path, override=override):
+                if _str_to_bool(dotverbose_from_env if dotverbose_from_env is not None else os.getenv("DOTVERBOSE")):
                     print(f"Use DOTENV file from {dotenv_path}")
                 return dotenv_path
 
+
     # No file was found and loaded, raise an informative error
     searched_paths = ", ".join(str(path) for path in candidate_paths)
-    raise FileNotFoundError(f"No DOTENV file found. Paths checked: {searched_paths}")
+    error_message = f"No DOTENV file found. Paths checked: {searched_paths}" 
+
+    if dry_run:
+        # In `dry_run` mode, return None instead of raising an exception if the .env file is not found.
+        if _str_to_bool(dotverbose_from_env):
+            print(error_message)
+        return None
+
+    raise FileNotFoundError(error_message)
 
