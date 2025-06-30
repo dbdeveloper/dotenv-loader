@@ -88,7 +88,8 @@ By default, dotenv-loader automatically identifies the `.env` file from the curr
 ```python
 import dotenv_loader
 
-dotenv_loader.load_env()  # Locate the resolved .env file and populate os.environ with its variables
+dotenv_loader.load_env()  # Locate the resolved .env file and populate os.environ
+                          # with its variables
 ```
 
 
@@ -106,8 +107,8 @@ load_env(
     steps_to_project_root=1,          # - how many directories up to look for project root
     default_env_filename='custom.env',# - change the default '.env' name to you name
     override=True,                    # - whether to overwrite existing values in os.environ
-    dry_run=True                      # - if True, only return the resolved .env path without
-                                      #   loading it
+    dry_run=True                      # - if True, only return the resolved .env path
+                                      #   without loading it
 )
 ```
 
