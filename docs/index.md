@@ -15,6 +15,7 @@ Flexible and secure .env loader for Python projects with support for environment
 - [Usage](#-usage)
   - [Basic Usage](#basic-usage)
   - [Advanced Usage](#advanced-usage)
+  - [Dry-run Usage](#dry-run-usage)
   - [Environment Variables](#environment-variables)
   - [Typical Directory Structure](#typical-directory-structure)
 - [.env Resolution Rules and Precedence](#-env-resolution-rules-and-precedence)
