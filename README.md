@@ -107,7 +107,7 @@ load_env(
     steps_to_project_root=1,          # - how many directories up to look for project root
     default_env_filename='custom.env',# - change the default '.env' name to you name
     override=True,                    # - whether to overwrite existing values in os.environ
-    dry_run=True                      # - if True, only return the resolved .env path
+    dry_run=False                     # - if True, only return the resolved .env path
                                       #   without loading it
 )
 ```
